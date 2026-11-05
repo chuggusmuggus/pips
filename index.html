@@ -41,7 +41,9 @@ body {
     background: var(--blue);
     filter: blur(8px);
     transform: scale(1.04);
-    transition: filter .8s ease, transform .8s ease;
+    transition:
+        filter .8s cubic-bezier(.16, 1, .3, 1),
+        transform .8s cubic-bezier(.16, 1, .3, 1);
 }
 
 .background::before {
@@ -78,16 +80,22 @@ body {
     }
 }
 
-/* BACKGROUND SHARPENS DURING TRANSITION */
+/* BACKGROUND STAYS SHARP AFTER PLAY */
 
 body.transitioning .background {
-    filter: blur(1px);
-    transform: scale(1.01);
+    filter: blur(0);
+    transform: scale(1);
 }
 
-/* GENERAL SCREENS */
+/* SCREEN LAYOUT */
+
+main {
+    display: grid;
+    min-height: 100vh;
+}
 
 .screen {
+    grid-area: 1 / 1;
     display: none;
     position: relative;
     width: min(1100px, calc(100% - 40px));
@@ -102,6 +110,7 @@ body.transitioning .background {
 /* HOME SCREEN */
 
 #home {
+    z-index: 2;
     align-items: center;
     justify-content: center;
     overflow: hidden;
@@ -110,9 +119,11 @@ body.transitioning .background {
 .play-wrap {
     position: relative;
     transition:
-        transform .75s cubic-bezier(.7, 0, .2, 1),
+        transform .75s cubic-bezier(.16, 1, .3, 1),
         opacity .55s ease;
 }
+
+/* PLAY BUTTON */
 
 .play-btn {
     min-width: 300px;
@@ -154,7 +165,7 @@ body.transitioning .background {
     box-shadow: 0 5px 0 var(--black);
 }
 
-/* PLAY BUTTON SWIPES AWAY */
+/* PLAY BUTTON EXITS UPWARDS */
 
 body.leaving .play-wrap {
     transform: translateY(-125vh) rotate(-3deg);
@@ -164,20 +175,26 @@ body.leaving .play-wrap {
 /* GAME SCREEN */
 
 #games {
+    z-index: 1;
     flex-direction: column;
     padding: 55px 0 80px;
     opacity: 0;
-    transform: translateY(70px);
+    transform: translateY(55px) scale(.985);
 }
 
 #games.active {
-    animation: gamesEnter .8s cubic-bezier(.2,.75,.2,1) .12s both;
+    animation: gamesEnter .75s cubic-bezier(.16, 1, .3, 1) both;
 }
 
 @keyframes gamesEnter {
+    from {
+        opacity: 0;
+        transform: translateY(55px) scale(.985);
+    }
+
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -395,37 +412,6 @@ h1 {
     transform: translate(-50%, 0);
 }
 
-/* MOBILE */
-
-@media(max-width: 560px) {
-    .screen {
-        width: calc(100% - 28px);
-    }
-
-    .play-btn {
-        min-width: 230px;
-        padding: 20px 42px;
-        border-width: 6px;
-    }
-
-    #games {
-        padding-top: 34px;
-    }
-
-    .heading-row {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .game-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .game-card {
-        min-height: 180px;
-    }
-}
-
 /* ACCESSIBILITY */
 
 @media(prefers-reduced-motion: reduce) {
@@ -456,7 +442,6 @@ h1 {
 
     </section>
 
-
     <!-- GAME SELECTION SCREEN -->
 
     <section class="screen" id="games">
@@ -470,7 +455,6 @@ h1 {
             </button>
 
         </div>
-
 
         <div class="game-grid">
 
@@ -489,7 +473,6 @@ h1 {
 
             </button>
 
-
             <button class="game-card numbers" disabled>
 
                 <span class="tag">Coming soon</span>
@@ -504,7 +487,6 @@ h1 {
 
             </button>
 
-
             <button class="game-card daily" disabled>
 
                 <span class="tag">Coming soon</span>
@@ -518,7 +500,6 @@ h1 {
                 </p>
 
             </button>
-
 
             <button class="game-card more" disabled>
 
@@ -544,13 +525,11 @@ h1 {
 
 </main>
 
-
 <!-- PIPS PLACEHOLDER MESSAGE -->
 
 <div class="toast" id="toast">
     Pips hasn't been built yet — that's the next step!
 </div>
-
 
 <script>
 
@@ -562,7 +541,6 @@ const toast = document.getElementById("toast");
 
 let changing = false;
 
-
 // OPEN GAME SELECTION
 
 function showGames() {
@@ -571,29 +549,21 @@ function showGames() {
 
     changing = true;
 
+    // Start all animations at the same time
     body.classList.add("transitioning", "leaving");
 
+    // Show the game screen immediately behind the home screen
+    games.classList.add("active");
+
+    // Remove the home screen after its exit animation
     setTimeout(() => {
 
         home.classList.remove("active");
-        games.classList.add("active");
-
         body.classList.remove("leaving");
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+        changing = false;
 
-        setTimeout(() => {
-
-            body.classList.remove("transitioning");
-            changing = false;
-
-        }, 850);
-
-    }, 430);
-
+    }, 750);
 }
 
 
@@ -605,23 +575,18 @@ function showHome() {
 
     changing = true;
 
-    body.classList.add("transitioning");
-
     games.classList.remove("active");
     home.classList.add("active");
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    window.scrollTo(0, 0);
+
+    // Keep the background sharp
+    body.classList.add("transitioning");
+    body.classList.remove("leaving");
 
     setTimeout(() => {
-
-        body.classList.remove("transitioning");
         changing = false;
-
-    }, 800);
-
+    }, 750);
 }
 
 
@@ -648,59 +613,6 @@ document.getElementById("pipsCard")
         }, 2600);
 
     });
-
-
-// SWIPE NAVIGATION
-
-let touchStartX = 0;
-let touchStartY = 0;
-
-document.addEventListener("touchstart", event => {
-
-    const touch = event.changedTouches[0];
-
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-
-}, { passive: true });
-
-
-document.addEventListener("touchend", event => {
-
-    const touch = event.changedTouches[0];
-
-    const dx = touch.clientX - touchStartX;
-    const dy = touch.clientY - touchStartY;
-
-    // Ignore small movements and horizontal swipes.
-
-    if (
-        Math.abs(dy) < 65 ||
-        Math.abs(dy) < Math.abs(dx) * 1.25
-    ) {
-        return;
-    }
-
-    // Swipe up: open game selection.
-
-    if (
-        dy < 0 &&
-        home.classList.contains("active")
-    ) {
-        showGames();
-    }
-
-    // Swipe down: return home, only at top of game screen.
-
-    else if (
-        dy > 0 &&
-        games.classList.contains("active") &&
-        window.scrollY === 0
-    ) {
-        showHome();
-    }
-
-}, { passive: true });
 
 </script>
 
