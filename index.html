@@ -1,42 +1,708 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Website</title>
-    <style>
-        body {
-            background-color: #111827;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 100px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puzzle Games</title>
 
-        h1 {
-            font-size: 45px;
-        }
+<style>
+:root {
+    --blue: #83b3ed;
+    --dark-blue: #6499d9;
+    --black: #20242b;
+    --white: #fffdf7;
+}
 
-        p {
-            color: lightgray;
-            font-size: 18px;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        button {
-            padding: 12px 25px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-    </style>
+html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    color: var(--black);
+}
+
+body {
+    min-height: 100vh;
+    background: var(--blue);
+    overflow-x: hidden;
+}
+
+/* MOVING BACKGROUND */
+
+.background {
+    position: fixed;
+    inset: -35px;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--blue);
+    filter: blur(8px);
+    transform: scale(1.04);
+    transition: filter .8s ease, transform .8s ease;
+}
+
+.background::before {
+    content: "";
+    position: absolute;
+    inset: -100%;
+
+    background-image:
+        radial-gradient(
+            circle,
+            rgba(48,105,177,.42) 0 9px,
+            transparent 10px
+        ),
+        linear-gradient(
+            45deg,
+            transparent 44%,
+            rgba(48,105,177,.25) 45% 53%,
+            transparent 54%
+        ),
+        linear-gradient(
+            -45deg,
+            transparent 44%,
+            rgba(48,105,177,.18) 45% 53%,
+            transparent 54%
+        );
+
+    background-size: 72px 72px;
+    animation: patternMove 28s linear infinite;
+}
+
+@keyframes patternMove {
+    to {
+        transform: translate(72px, 72px);
+    }
+}
+
+/* BACKGROUND SHARPENS DURING TRANSITION */
+
+body.transitioning .background {
+    filter: blur(1px);
+    transform: scale(1.01);
+}
+
+/* GENERAL SCREENS */
+
+.screen {
+    display: none;
+    position: relative;
+    width: min(1100px, calc(100% - 40px));
+    min-height: 100vh;
+    margin: auto;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* HOME SCREEN */
+
+#home {
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.play-wrap {
+    position: relative;
+    transition:
+        transform .75s cubic-bezier(.7, 0, .2, 1),
+        opacity .55s ease;
+}
+
+.play-btn {
+    min-width: 300px;
+    padding: 24px 64px;
+
+    border: 7px solid var(--black);
+    border-radius: 27px;
+
+    background: var(--white);
+    color: var(--black);
+
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 900;
+    letter-spacing: -.065em;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 0 var(--black),
+        0 16px 35px rgba(28,61,101,.18);
+
+    transition:
+        transform .22s cubic-bezier(.2,.8,.2,1),
+        box-shadow .22s ease,
+        background .22s ease;
+}
+
+.play-btn:hover {
+    transform: translateY(-6px) scale(1.035);
+    background: white;
+
+    box-shadow:
+        0 14px 0 var(--black),
+        0 22px 40px rgba(28,61,101,.23);
+}
+
+.play-btn:active {
+    transform: translateY(2px) scale(.985);
+    box-shadow: 0 5px 0 var(--black);
+}
+
+/* PLAY BUTTON SWIPES AWAY */
+
+body.leaving .play-wrap {
+    transform: translateY(-125vh) rotate(-3deg);
+    opacity: 0;
+}
+
+/* GAME SCREEN */
+
+#games {
+    flex-direction: column;
+    padding: 55px 0 80px;
+    opacity: 0;
+    transform: translateY(70px);
+}
+
+#games.active {
+    animation: gamesEnter .8s cubic-bezier(.2,.75,.2,1) .12s both;
+}
+
+@keyframes gamesEnter {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* GAME SCREEN HEADER */
+
+.heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+h1 {
+    font-size: clamp(2.5rem, 6vw, 4.3rem);
+    letter-spacing: -.07em;
+    margin: 0;
+    font-weight: 900;
+}
+
+/* BACK BUTTON */
+
+.back-btn {
+    border: 4px solid var(--black);
+    border-radius: 13px;
+    background: var(--white);
+
+    padding: 10px 16px;
+    font-weight: 850;
+    cursor: pointer;
+
+    box-shadow: 0 4px 0 var(--black);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+}
+
+.back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 0 var(--black);
+    background: white;
+}
+
+.back-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--black);
+}
+
+/* GAME CARDS */
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(235px, 1fr)
+    );
+    gap: 19px;
+}
+
+.game-card {
+    position: relative;
+    min-height: 205px;
+    text-align: left;
+    padding: 22px;
+
+    border: 5px solid var(--black);
+    border-radius: 20px;
+
+    background: var(--white);
+    cursor: pointer;
+
+    box-shadow: 0 6px 0 var(--black);
+
+    transition:
+        transform .22s cubic-bezier(.2,.8,.2,1),
+        box-shadow .22s ease,
+        filter .22s ease;
+
+    animation: cardEnter .55s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.game-card:nth-child(2) {
+    animation-delay: .08s;
+}
+
+.game-card:nth-child(3) {
+    animation-delay: .16s;
+}
+
+.game-card:nth-child(4) {
+    animation-delay: .24s;
+}
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(25px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.game-card:hover:not(:disabled) {
+    transform: translateY(-7px) rotate(-.5deg);
+    box-shadow: 0 13px 0 var(--black);
+    filter: saturate(1.08);
+}
+
+.game-card:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 var(--black);
+}
+
+.game-card:disabled {
+    cursor: default;
+    opacity: .78;
+}
+
+/* CARD COLOURS */
+
+.pips {
+    background: #dce9fb;
+}
+
+.numbers {
+    background: #e3f0dd;
+}
+
+.daily {
+    background: #faedbd;
+}
+
+.more {
+    background: #f3e1f0;
+}
+
+/* CARD CONTENT */
+
+.card-icon {
+    font-size: 2.35rem;
+    line-height: 1;
+}
+
+.game-card h2 {
+    font-size: 1.65rem;
+    margin: 16px 0 6px;
+    letter-spacing: -.04em;
+}
+
+.game-card p {
+    font-size: .97rem;
+    line-height: 1.45;
+    color: #4f5864;
+    margin: 0;
+    max-width: 300px;
+}
+
+.tag {
+    position: absolute;
+    right: 15px;
+    top: 16px;
+
+    font-size: .68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+
+    border: 2px solid var(--black);
+    border-radius: 99px;
+    padding: 5px 8px;
+    background: white;
+}
+
+.footer {
+    margin-top: 26px;
+    color: #314d70;
+    font-size: .9rem;
+}
+
+/* NOTIFICATION */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+
+    transform: translate(-50%, 20px);
+
+    background: var(--white);
+    border: 4px solid var(--black);
+    border-radius: 13px;
+
+    padding: 12px 17px;
+    font-weight: 800;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: .25s;
+
+    box-shadow: 0 4px 0 var(--black);
+
+    text-align: center;
+    width: max-content;
+    max-width: calc(100% - 28px);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* MOBILE */
+
+@media(max-width: 560px) {
+    .screen {
+        width: calc(100% - 28px);
+    }
+
+    .play-btn {
+        min-width: 230px;
+        padding: 20px 42px;
+        border-width: 6px;
+    }
+
+    #games {
+        padding-top: 34px;
+    }
+
+    .heading-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .game-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .game-card {
+        min-height: 180px;
+    }
+}
+
+/* ACCESSIBILITY */
+
+@media(prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+</style>
 </head>
 
 <body>
-    <h1>Welcome to My Website!</h1>
-    <p>This is my first GitHub Pages website.</p>
 
-    <button onclick="alert('Hello!')">
-        Click Me
-    </button>
+<div class="background"></div>
+
+<main>
+
+    <!-- HOME SCREEN -->
+
+    <section class="screen active" id="home">
+
+        <div class="play-wrap">
+            <button class="play-btn" id="playButton">
+                Play
+            </button>
+        </div>
+
+    </section>
+
+
+    <!-- GAME SELECTION SCREEN -->
+
+    <section class="screen" id="games">
+
+        <div class="heading-row">
+
+            <h1>Choose a game</h1>
+
+            <button class="back-btn" id="backButton">
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div class="game-grid">
+
+            <button class="game-card pips" id="pipsCard">
+
+                <span class="tag">Coming soon</span>
+
+                <div class="card-icon">⚄</div>
+
+                <h2>Pips</h2>
+
+                <p>
+                    A domino-style logic puzzle.
+                    New puzzles across easy, medium and hard.
+                </p>
+
+            </button>
+
+
+            <button class="game-card numbers" disabled>
+
+                <span class="tag">Coming soon</span>
+
+                <div class="card-icon">▦</div>
+
+                <h2>Number Grid</h2>
+
+                <p>
+                    A satisfying number-based logic challenge.
+                </p>
+
+            </button>
+
+
+            <button class="game-card daily" disabled>
+
+                <span class="tag">Coming soon</span>
+
+                <div class="card-icon">✎</div>
+
+                <h2>Daily Logic</h2>
+
+                <p>
+                    Quick brain teasers to solve whenever you like.
+                </p>
+
+            </button>
+
+
+            <button class="game-card more" disabled>
+
+                <span class="tag">Coming soon</span>
+
+                <div class="card-icon">＋</div>
+
+                <h2>More games</h2>
+
+                <p>
+                    More little puzzles will be added here.
+                </p>
+
+            </button>
+
+        </div>
+
+        <p class="footer">
+            Pick a puzzle and have fun.
+        </p>
+
+    </section>
+
+</main>
+
+
+<!-- PIPS PLACEHOLDER MESSAGE -->
+
+<div class="toast" id="toast">
+    Pips hasn't been built yet — that's the next step!
+</div>
+
+
+<script>
+
+const body = document.body;
+
+const home = document.getElementById("home");
+const games = document.getElementById("games");
+const toast = document.getElementById("toast");
+
+let changing = false;
+
+
+// OPEN GAME SELECTION
+
+function showGames() {
+
+    if (changing || games.classList.contains("active")) return;
+
+    changing = true;
+
+    body.classList.add("transitioning", "leaving");
+
+    setTimeout(() => {
+
+        home.classList.remove("active");
+        games.classList.add("active");
+
+        body.classList.remove("leaving");
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        setTimeout(() => {
+
+            body.classList.remove("transitioning");
+            changing = false;
+
+        }, 850);
+
+    }, 430);
+
+}
+
+
+// RETURN HOME
+
+function showHome() {
+
+    if (changing || home.classList.contains("active")) return;
+
+    changing = true;
+
+    body.classList.add("transitioning");
+
+    games.classList.remove("active");
+    home.classList.add("active");
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+    setTimeout(() => {
+
+        body.classList.remove("transitioning");
+        changing = false;
+
+    }, 800);
+
+}
+
+
+// BUTTON EVENTS
+
+document.getElementById("playButton")
+    .addEventListener("click", showGames);
+
+document.getElementById("backButton")
+    .addEventListener("click", showHome);
+
+
+// PIPS PLACEHOLDER
+
+document.getElementById("pipsCard")
+    .addEventListener("click", () => {
+
+        toast.classList.add("show");
+
+        clearTimeout(window.toastTimer);
+
+        window.toastTimer = setTimeout(() => {
+            toast.classList.remove("show");
+        }, 2600);
+
+    });
+
+
+// SWIPE NAVIGATION
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener("touchstart", event => {
+
+    const touch = event.changedTouches[0];
+
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+
+}, { passive: true });
+
+
+document.addEventListener("touchend", event => {
+
+    const touch = event.changedTouches[0];
+
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+
+    // Ignore small movements and horizontal swipes.
+
+    if (
+        Math.abs(dy) < 65 ||
+        Math.abs(dy) < Math.abs(dx) * 1.25
+    ) {
+        return;
+    }
+
+    // Swipe up: open game selection.
+
+    if (
+        dy < 0 &&
+        home.classList.contains("active")
+    ) {
+        showGames();
+    }
+
+    // Swipe down: return home, only at top of game screen.
+
+    else if (
+        dy > 0 &&
+        games.classList.contains("active") &&
+        window.scrollY === 0
+    ) {
+        showHome();
+    }
+
+}, { passive: true });
+
+</script>
+
 </body>
 </html>
