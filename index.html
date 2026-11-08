@@ -77,16 +77,26 @@ button { cursor:pointer; }
     border: 0;
 }
 
+/* Region borders */
+.cell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    border: 0;
+}
+
 .cell.region-top::before {
     border-top: 3px solid black;
 }
 
-.cell.region-bottom::before {
-    border-bottom: 3px solid black;
-}
-
 .cell.region-left::before {
     border-left: 3px solid black;
+}
+
+.cell.region-bottom::before {
+    border-bottom: 3px solid black;
 }
 
 .cell.region-right::before {
@@ -836,22 +846,21 @@ function renderBoard() {
 
         const sameRegion = index =>
             boardData[index]?.regionId === cell.regionId;
+if (row === 0 || !sameRegion(i - SIZE)) {
+    element.classList.add("region-top");
+}
 
-        if (row === 0 || !sameRegion(i - SIZE)) {
-            element.classList.add("region-top");
-        }
+if (row === SIZE - 1) {
+    element.classList.add("region-bottom");
+}
 
-        if (row === SIZE - 1 || !sameRegion(i + SIZE)) {
-            element.classList.add("region-bottom");
-        }
+if (col === 0 || !sameRegion(i - 1)) {
+    element.classList.add("region-left");
+}
 
-        if (col === 0 || !sameRegion(i - 1)) {
-            element.classList.add("region-left");
-        }
-
-        if (col === SIZE - 1 || !sameRegion(i + 1)) {
-            element.classList.add("region-right");
-        }
+if (col === SIZE - 1) {
+    element.classList.add("region-right");
+}
 
         if (cell.dominoId !== null) {
             const domino = dominoes.find(d => d.id === cell.dominoId);
