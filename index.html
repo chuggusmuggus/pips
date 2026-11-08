@@ -19,12 +19,17 @@ button { cursor:pointer; }
 #menu select, #menu button {
     padding:12px 20px; background:white; color:black; border:1px solid black;
 }
+#menuTitle {
+    margin:0 0 12px; font-size:42px; font-weight:700;
+    letter-spacing:-1.5px; line-height:1;
+}
 #menu button { min-width:140px; }
 
 #game { display:none; padding:22px 25px; max-width:1000px; margin:auto; }
 #gameTop {
     display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
     gap:12px; margin-bottom:24px; min-height:38px;
+    padding-bottom:14px; border-bottom:1px solid #d5d5d5;
 }
 .top-left, .top-right { display:flex; align-items:center; gap:18px; }
 .top-right { justify-content:flex-end; }
@@ -32,7 +37,10 @@ button { cursor:pointer; }
     border:0; background:transparent; color:black; padding:4px;
     font-size:16px; line-height:1.2;
 }
-#back { font-size:27px !important; }
+#back {
+    font-size:27px !important; align-self:center; line-height:1;
+    position:relative; top:-2px;
+}
 #newPuzzle { white-space:nowrap; }
 #difficultyTitle { text-align:center; font-size:16px; font-weight:600; }
 #tutorialButton { font-size:21px !important; }
@@ -40,6 +48,11 @@ button { cursor:pointer; }
 #timer { font-variant-numeric:tabular-nums; min-width:42px; text-align:right; }
 
 #boardWrap { position:relative; width:max-content; margin:0 auto 25px; }
+#boardWrap::after {
+    content:""; position:absolute; top:calc(100% + 25px); left:50%;
+    transform:translateX(-50%); width:min(750px, calc(100vw - 50px));
+    border-bottom:1px solid #d5d5d5;
+}
 #board {
     display:grid; grid-template-columns:repeat(6,64px);
     grid-template-rows:repeat(6,64px); width:384px; height:384px;
@@ -52,6 +65,23 @@ button { cursor:pointer; }
 .cell.region-bottom { border-bottom:3px solid black; }
 .cell.region-left { border-left:3px solid black; }
 .cell.region-right { border-right:3px solid black; }
+
+/* Draw region edges as inset strokes so adjoining edges meet cleanly. */
+.cell.region-top { box-shadow:inset 0 3px 0 #000; border-top-color:transparent; }
+.cell.region-bottom { box-shadow:inset 0 -3px 0 #000; border-bottom-color:transparent; }
+.cell.region-left { box-shadow:inset 3px 0 0 #000; border-left-color:transparent; }
+.cell.region-right { box-shadow:inset -3px 0 0 #000; border-right-color:transparent; }
+.cell.region-top.region-left { box-shadow:inset 0 3px 0 #000, inset 3px 0 0 #000; }
+.cell.region-top.region-right { box-shadow:inset 0 3px 0 #000, inset -3px 0 0 #000; }
+.cell.region-bottom.region-left { box-shadow:inset 0 -3px 0 #000, inset 3px 0 0 #000; }
+.cell.region-bottom.region-right { box-shadow:inset 0 -3px 0 #000, inset -3px 0 0 #000; }
+.cell.region-top.region-bottom { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000; }
+.cell.region-left.region-right { box-shadow:inset 3px 0 0 #000, inset -3px 0 0 #000; }
+.cell.region-top.region-left.region-right { box-shadow:inset 0 3px 0 #000, inset 3px 0 0 #000, inset -3px 0 0 #000; }
+.cell.region-bottom.region-left.region-right { box-shadow:inset 0 -3px 0 #000, inset 3px 0 0 #000, inset -3px 0 0 #000; }
+.cell.region-top.region-bottom.region-left { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000, inset 3px 0 0 #000; }
+.cell.region-top.region-bottom.region-right { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000, inset -3px 0 0 #000; }
+.cell.region-top.region-bottom.region-left.region-right { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000, inset 3px 0 0 #000, inset -3px 0 0 #000; }
 .cell.drop-target { background:#f0f0f0; }
 
 .region-badge {
@@ -85,7 +115,7 @@ button { cursor:pointer; }
     align-self:center; justify-self:center;
 }
 
-#trayTitle { text-align:center; margin:15px 0 10px; }
+#trayTitle { display:none; }
 #tray {
     display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
     max-width:750px; min-height:42px; margin:auto; padding:8px;
@@ -125,10 +155,11 @@ button { cursor:pointer; }
 }
 #tutorialOverlay.show { display:flex; }
 #tutorialBox {
-    width:min(440px,calc(100% - 30px)); min-height:300px; background:white;
+    width:min(440px,calc(100% - 30px)); height:360px; background:white;
     border:1px solid black; padding:25px; position:relative;
     display:flex; flex-direction:column;
 }
+#tutorialContent { flex:1; min-height:0; overflow-y:auto; }
 #tutorialClose {
     position:absolute; top:10px; right:12px; border:0; background:white;
     font-size:22px;
@@ -142,6 +173,22 @@ button { cursor:pointer; }
 #tutorialNavigation button {
     background:white; border:1px solid black; padding:7px 12px;
 }
+#tutorialNavigation .tutorial-dot {
+    flex:0 0 10px; width:10px; min-width:10px; height:10px;
+    min-height:10px; padding:0; margin:0; border:1px solid #777;
+    border-radius:50%; background:white; aspect-ratio:1 / 1;
+}
+#tutorialNavigation .tutorial-dot.active {
+    background:#888; border-color:#888;
+}
+.tutorial-symbol {
+    display:flex; align-items:center; justify-content:center;
+    min-width:48px; width:max-content; height:48px; padding:0 12px;
+    margin:18px auto 10px; border:1.5px solid #555;
+    border-radius:50%; background:#f5f5f5; color:#111;
+    font-size:20px; font-weight:700; line-height:1;
+}
+.tutorial-symbol.wide { border-radius:24px; min-width:62px; }
 #tutorialDots { display:flex; gap:9px; align-items:center; justify-content:center; }
 .tutorial-dot {
     appearance:none; flex:0 0 9px; width:9px; min-width:9px; height:9px;
@@ -171,6 +218,7 @@ button { cursor:pointer; }
 <body>
 
 <div id="menu">
+    <h1 id="menuTitle">Pips</h1>
     <select id="difficulty">
         <option value="easy">Easy</option>
         <option value="medium" selected>Medium</option>
@@ -246,15 +294,18 @@ const tutorials = [
     },
     {
         title: "Number clues",
-        text: "A number means the pips in that region must add up to exactly that number. For example, 8 means all pips inside the outlined region must total 8."
+        text: "A number means the pips in that region must add up to exactly that number. For example, 8 means all pips inside the outlined region must total 8.",
+        symbol: "8"
     },
     {
         title: "Equal and not equal",
-        text: "The = clue means every square in that region must have the same number of pips. The ≠ clue means every square must have a different number of pips from every other square in that region."
+        text: "The = clue means every square in that region must have the same number of pips. The ≠ clue means every square must have a different number of pips from every other square in that region.",
+        symbols: ["=", "≠"]
     },
     {
         title: "Less than and greater than",
-        text: "A clue such as <8 means the total pips in that region must be less than 8. A clue such as >8 means the total must be greater than 8. The number is a limit, not the required total."
+        text: "A clue such as <8 means the total pips in that region must be less than 8. A clue such as >8 means the total must be greater than 8. The number is a limit, not the required total.",
+        symbols: ["<8", ">8"]
     },
     {
         title: "Rotate and confirm",
@@ -735,6 +786,31 @@ function renderBoard() {
     const board = document.getElementById("board");
     board.innerHTML = "";
 
+    // Assign soft colours to regions; neighbouring regions never share a colour.
+    const regionPalette = [
+        "#f2dada", "#d8e8f5", "#dcebd7", "#f2e3c8",
+        "#e3dcf2", "#cfe9e4", "#efd8e9", "#e8e4d2"
+    ];
+    const regionById = new Map(regions.map(region => [region.id, region]));
+    const regionAdjacency = new Map(regions.map(region => [region.id, new Set()]));
+    boardData.forEach((cell, index) => {
+        if (cell.regionId === null) return;
+        neighbours(index).forEach(nextIndex => {
+            const otherId = boardData[nextIndex]?.regionId;
+            if (otherId !== undefined && otherId !== null && otherId !== cell.regionId) {
+                regionAdjacency.get(cell.regionId).add(otherId);
+            }
+        });
+    });
+    regions.forEach(region => {
+        const used = new Set(
+            [...regionAdjacency.get(region.id)]
+                .map(id => regionById.get(id)?.visualColor)
+                .filter(Boolean)
+        );
+        region.visualColor = regionPalette.find(color => !used.has(color)) || regionPalette[region.id % regionPalette.length];
+    });
+
     for (let i = 0; i < SIZE * SIZE; i++) {
         const cell = boardData[i];
         const row = Math.floor(i / SIZE);
@@ -742,6 +818,8 @@ function renderBoard() {
 
         const element = document.createElement("div");
         element.className = "cell";
+        const cellRegion = regionById.get(cell.regionId);
+        if (cellRegion) element.style.backgroundColor = cellRegion.visualColor;
 
         const sameRegion = index =>
             boardData[index]?.regionId === cell.regionId;
@@ -982,8 +1060,15 @@ function renderTutorial() {
     const dots = document.getElementById("tutorialDots");
     const page = tutorials[tutorialPage];
 
+    const symbolMarkup = page.symbol
+        ? `<div class="tutorial-symbol">${page.symbol}</div>`
+        : page.symbols
+            ? `<div style="display:flex;justify-content:center;gap:12px;">${page.symbols.map(symbol => `<div class="tutorial-symbol wide">${symbol}</div>`).join("")}</div>`
+            : "";
+
     content.innerHTML = `
         <h2>${page.title}</h2>
+        ${symbolMarkup}
         <p>${page.text}</p>
     `;
 
