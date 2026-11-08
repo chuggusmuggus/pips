@@ -4,421 +4,196 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Puzzle Games</title>
+<title>Pips</title>
 
 <style>
-:root {
-    --blue: #83b3ed;
-    --dark-blue: #6499d9;
-    --black: #20242b;
-    --white: #fffdf7;
-}
-
 * {
     box-sizing: border-box;
 }
 
-html, body {
-    margin: 0;
-    min-height: 100%;
-    font-family: "Trebuchet MS", Arial, sans-serif;
-    color: var(--black);
-}
-
 body {
+    margin: 0;
+    background: white;
+    color: black;
+    font-family: Arial, sans-serif;
+}
+
+button, select {
+    font: inherit;
+}
+
+#menu {
     min-height: 100vh;
-    background: var(--blue);
-    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-direction: column;
 }
 
-/* MOVING BACKGROUND */
-
-.background {
-    position: fixed;
-    inset: -35px;
-    z-index: -1;
-    overflow: hidden;
-    background: var(--blue);
-    filter: blur(8px);
-    transform: scale(1.04);
-    transition:
-        filter .8s cubic-bezier(.16, 1, .3, 1),
-        transform .8s cubic-bezier(.16, 1, .3, 1);
+#menu select,
+#menu button {
+    padding: 12px 20px;
+    background: white;
+    color: black;
+    border: 1px solid black;
+    cursor: pointer;
 }
 
-.background::before {
-    content: "";
-    position: absolute;
-    inset: -100%;
-
-    background-image:
-        radial-gradient(
-            circle,
-            rgba(48,105,177,.42) 0 9px,
-            transparent 10px
-        ),
-        linear-gradient(
-            45deg,
-            transparent 44%,
-            rgba(48,105,177,.25) 45% 53%,
-            transparent 54%
-        ),
-        linear-gradient(
-            -45deg,
-            transparent 44%,
-            rgba(48,105,177,.18) 45% 53%,
-            transparent 54%
-        );
-
-    background-size: 72px 72px;
-    animation: patternMove 28s linear infinite;
+#menu button {
+    min-width: 140px;
 }
 
-@keyframes patternMove {
-    to {
-        transform: translate(72px, 72px);
-    }
-}
-
-/* BACKGROUND STAYS SHARP AFTER PLAY */
-
-body.transitioning .background {
-    filter: blur(0);
-    transform: scale(1);
-}
-
-/* SCREEN LAYOUT */
-
-main {
-    display: grid;
-    min-height: 100vh;
-}
-
-.screen {
-    grid-area: 1 / 1;
+#game {
     display: none;
-    position: relative;
-    width: min(1100px, calc(100% - 40px));
-    min-height: 100vh;
+    padding: 25px;
+    max-width: 900px;
     margin: auto;
 }
 
-.screen.active {
+#gameTop {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-/* HOME SCREEN */
+#gameTop button,
+#controls button {
+    background: white;
+    border: 1px solid black;
+    padding: 8px 13px;
+    cursor: pointer;
+}
 
-#home {
-    z-index: 2;
+#board {
+    display: grid;
+    grid-template-columns: repeat(6, 64px);
+    grid-template-rows: repeat(6, 64px);
+    width: max-content;
+    margin: 0 auto 25px;
+}
+
+.cell {
+    position: relative;
+    border: 1px solid #aaa;
+    display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-}
-
-.play-wrap {
-    position: relative;
-    transition:
-        transform .75s cubic-bezier(.16, 1, .3, 1),
-        opacity .55s ease;
-}
-
-/* PLAY BUTTON */
-
-.play-btn {
-    min-width: 300px;
-    padding: 24px 64px;
-
-    border: 7px solid var(--black);
-    border-radius: 27px;
-
-    background: var(--white);
-    color: var(--black);
-
-    font-size: clamp(3rem, 8vw, 5rem);
-    font-weight: 900;
-    letter-spacing: -.065em;
-
+    font-size: 25px;
     cursor: pointer;
-
-    box-shadow:
-        0 8px 0 var(--black),
-        0 16px 35px rgba(28,61,101,.18);
-
-    transition:
-        transform .22s cubic-bezier(.2,.8,.2,1),
-        box-shadow .22s ease,
-        background .22s ease;
+    user-select: none;
 }
 
-.play-btn:hover {
-    transform: translateY(-6px) scale(1.035);
-    background: white;
-
-    box-shadow:
-        0 14px 0 var(--black),
-        0 22px 40px rgba(28,61,101,.23);
+.cell.region-top {
+    border-top: 3px solid black;
 }
 
-.play-btn:active {
-    transform: translateY(2px) scale(.985);
-    box-shadow: 0 5px 0 var(--black);
+.cell.region-bottom {
+    border-bottom: 3px solid black;
 }
 
-/* PLAY BUTTON EXITS UPWARDS */
-
-body.leaving .play-wrap {
-    transform: translateY(-125vh) rotate(-3deg);
-    opacity: 0;
+.cell.region-left {
+    border-left: 3px solid black;
 }
 
-/* GAME SCREEN */
-
-#games {
-    z-index: 1;
-    flex-direction: column;
-    padding: 55px 0 80px;
-    opacity: 0;
-    transform: translateY(55px) scale(.985);
+.cell.region-right {
+    border-right: 3px solid black;
 }
 
-#games.active {
-    animation: gamesEnter .75s cubic-bezier(.16, 1, .3, 1) both;
+.cell.selected {
+    background: #e8e8e8;
 }
 
-@keyframes gamesEnter {
-    from {
-        opacity: 0;
-        transform: translateY(55px) scale(.985);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.cell.filled {
+    background: #f3f3f3;
 }
 
-/* GAME SCREEN HEADER */
-
-.heading-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 28px;
-}
-
-h1 {
-    font-size: clamp(2.5rem, 6vw, 4.3rem);
-    letter-spacing: -.07em;
-    margin: 0;
-    font-weight: 900;
-}
-
-/* BACK BUTTON */
-
-.back-btn {
-    border: 4px solid var(--black);
-    border-radius: 13px;
-    background: var(--white);
-
-    padding: 10px 16px;
-    font-weight: 850;
-    cursor: pointer;
-
-    box-shadow: 0 4px 0 var(--black);
-
-    transition:
-        transform .18s ease,
-        box-shadow .18s ease,
-        background .18s ease;
-}
-
-.back-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 0 var(--black);
-    background: white;
-}
-
-.back-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0 var(--black);
-}
-
-/* GAME CARDS */
-
-.game-grid {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fit,
-        minmax(235px, 1fr)
-    );
-    gap: 19px;
-}
-
-.game-card {
-    position: relative;
-    min-height: 205px;
-    text-align: left;
-    padding: 22px;
-
-    border: 5px solid var(--black);
-    border-radius: 20px;
-
-    background: var(--white);
-    cursor: pointer;
-
-    box-shadow: 0 6px 0 var(--black);
-
-    transition:
-        transform .22s cubic-bezier(.2,.8,.2,1),
-        box-shadow .22s ease,
-        filter .22s ease;
-
-    animation: cardEnter .55s cubic-bezier(.2,.8,.2,1) both;
-}
-
-.game-card:nth-child(2) {
-    animation-delay: .08s;
-}
-
-.game-card:nth-child(3) {
-    animation-delay: .16s;
-}
-
-.game-card:nth-child(4) {
-    animation-delay: .24s;
-}
-
-@keyframes cardEnter {
-    from {
-        opacity: 0;
-        transform: translateY(25px) scale(.97);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.game-card:hover:not(:disabled) {
-    transform: translateY(-7px) rotate(-.5deg);
-    box-shadow: 0 13px 0 var(--black);
-    filter: saturate(1.08);
-}
-
-.game-card:active:not(:disabled) {
-    transform: translateY(2px);
-    box-shadow: 0 3px 0 var(--black);
-}
-
-.game-card:disabled {
-    cursor: default;
-    opacity: .78;
-}
-
-/* CARD COLOURS */
-
-.pips {
-    background: #dce9fb;
-}
-
-.numbers {
-    background: #e3f0dd;
-}
-
-.daily {
-    background: #faedbd;
-}
-
-.more {
-    background: #f3e1f0;
-}
-
-/* CARD CONTENT */
-
-.card-icon {
-    font-size: 2.35rem;
-    line-height: 1;
-}
-
-.game-card h2 {
-    font-size: 1.65rem;
-    margin: 16px 0 6px;
-    letter-spacing: -.04em;
-}
-
-.game-card p {
-    font-size: .97rem;
-    line-height: 1.45;
-    color: #4f5864;
-    margin: 0;
-    max-width: 300px;
-}
-
-.tag {
+.cell .clue {
     position: absolute;
-    right: 15px;
-    top: 16px;
+    top: 2px;
+    left: 3px;
+    font-size: 9px;
+    font-weight: bold;
+    max-width: 58px;
+    line-height: 1.1;
+}
 
-    font-size: .68rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .05em;
+#tray {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 700px;
+    margin: auto;
+}
 
-    border: 2px solid var(--black);
-    border-radius: 99px;
-    padding: 5px 8px;
+.domino {
+    display: flex;
+    border: 1px solid black;
     background: white;
+    cursor: pointer;
+    min-width: 76px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
 }
 
-.footer {
-    margin-top: 26px;
-    color: #314d70;
-    font-size: .9rem;
+.domino span {
+    padding: 0 9px;
 }
 
-/* NOTIFICATION */
+.domino.selected {
+    background: #e5e5e5;
+    outline: 2px solid black;
+}
 
-.toast {
-    position: fixed;
-    left: 50%;
-    bottom: 24px;
+.domino.used {
+    display: none;
+}
 
-    transform: translate(-50%, 20px);
+#controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
 
-    background: var(--white);
-    border: 4px solid var(--black);
-    border-radius: 13px;
-
-    padding: 12px 17px;
-    font-weight: 800;
-
-    opacity: 0;
-    pointer-events: none;
-
-    transition: .25s;
-
-    box-shadow: 0 4px 0 var(--black);
-
+#status {
     text-align: center;
-    width: max-content;
-    max-width: calc(100% - 28px);
+    margin: 15px 0;
+    min-height: 24px;
 }
 
-.toast.show {
-    opacity: 1;
-    transform: translate(-50%, 0);
+#progress {
+    text-align: center;
+    margin-bottom: 15px;
 }
 
-/* ACCESSIBILITY */
+#instructions {
+    text-align: center;
+    margin: 10px;
+    font-size: 14px;
+}
 
-@media(prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
+@media (max-width: 600px) {
+    #game {
+        padding: 10px;
+    }
+
+    #board {
+        grid-template-columns: repeat(6, min(14vw, 64px));
+        grid-template-rows: repeat(6, min(14vw, 64px));
+    }
+
+    .cell {
+        font-size: 20px;
+    }
+
+    .cell .clue {
+        font-size: 7px;
     }
 }
 </style>
@@ -426,193 +201,650 @@ h1 {
 
 <body>
 
-<div class="background"></div>
+<!-- HOME MENU -->
 
-<main>
+<div id="menu">
 
-    <!-- HOME SCREEN -->
+    <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+    </select>
 
-    <section class="screen active" id="home">
+    <button id="play">Play</button>
 
-        <div class="play-wrap">
-            <button class="play-btn" id="playButton">
-                Play
-            </button>
-        </div>
-
-    </section>
-
-    <!-- GAME SELECTION SCREEN -->
-
-    <section class="screen" id="games">
-
-        <div class="heading-row">
-
-            <h1>Choose a game</h1>
-
-            <button class="back-btn" id="backButton">
-                ← Back
-            </button>
-
-        </div>
-
-        <div class="game-grid">
-
-            <button class="game-card pips" id="pipsCard">
-
-                <span class="tag">Coming soon</span>
-
-                <div class="card-icon">⚄</div>
-
-                <h2>Pips</h2>
-
-                <p>
-                    A domino-style logic puzzle.
-                    New puzzles across easy, medium and hard.
-                </p>
-
-            </button>
-
-            <button class="game-card numbers" disabled>
-
-                <span class="tag">Coming soon</span>
-
-                <div class="card-icon">▦</div>
-
-                <h2>Number Grid</h2>
-
-                <p>
-                    A satisfying number-based logic challenge.
-                </p>
-
-            </button>
-
-            <button class="game-card daily" disabled>
-
-                <span class="tag">Coming soon</span>
-
-                <div class="card-icon">✎</div>
-
-                <h2>Daily Logic</h2>
-
-                <p>
-                    Quick brain teasers to solve whenever you like.
-                </p>
-
-            </button>
-
-            <button class="game-card more" disabled>
-
-                <span class="tag">Coming soon</span>
-
-                <div class="card-icon">＋</div>
-
-                <h2>More games</h2>
-
-                <p>
-                    More little puzzles will be added here.
-                </p>
-
-            </button>
-
-        </div>
-
-        <p class="footer">
-            Pick a puzzle and have fun.
-        </p>
-
-    </section>
-
-</main>
-
-<!-- PIPS PLACEHOLDER MESSAGE -->
-
-<div class="toast" id="toast">
-    Pips hasn't been built yet — that's the next step!
 </div>
+
+
+<!-- GAME -->
+
+<div id="game">
+
+    <div id="gameTop">
+        <button id="back">Back</button>
+        <strong id="difficultyTitle">Medium</strong>
+        <button id="newPuzzle">New puzzle</button>
+    </div>
+
+    <div id="progress"></div>
+
+    <div id="board"></div>
+
+    <div id="instructions">
+        Select a domino, then click two adjacent empty squares to place it.
+        Select a placed domino to remove it.
+    </div>
+
+    <div id="controls">
+        <button id="flip">Flip domino</button>
+        <button id="clearSelection">Deselect</button>
+    </div>
+
+    <div id="tray"></div>
+
+    <div id="status"></div>
+
+</div>
+
 
 <script>
 
-const body = document.body;
+// --------------------------------------------------
+// GAME STATE
+// --------------------------------------------------
 
-const home = document.getElementById("home");
-const games = document.getElementById("games");
-const toast = document.getElementById("toast");
+const SIZE = 6;
 
-let changing = false;
+let difficulty = "medium";
+let puzzle = null;
 
-// OPEN GAME SELECTION
+let selectedDomino = null;
+let firstCell = null;
+let flipped = false;
 
-function showGames() {
+let boardData = [];
+let dominoes = [];
+let regions = [];
 
-    if (changing || games.classList.contains("active")) return;
 
-    changing = true;
+// --------------------------------------------------
+// RANDOM HELPERS
+// --------------------------------------------------
 
-    // Start all animations at the same time
-    body.classList.add("transitioning", "leaving");
+function randomInt(max) {
+    return Math.floor(Math.random() * max);
+}
 
-    // Show the game screen immediately behind the home screen
-    games.classList.add("active");
+function shuffle(array) {
+    return [...array].sort(() => Math.random() - 0.5);
+}
 
-    // Remove the home screen after its exit animation
-    setTimeout(() => {
+function neighbours(index) {
+    const row = Math.floor(index / SIZE);
+    const col = index % SIZE;
 
-        home.classList.remove("active");
-        body.classList.remove("leaving");
+    const result = [];
 
-        changing = false;
+    if (row > 0) result.push(index - SIZE);
+    if (row < SIZE - 1) result.push(index + SIZE);
+    if (col > 0) result.push(index - 1);
+    if (col < SIZE - 1) result.push(index + 1);
 
-    }, 750);
+    return result;
 }
 
 
-// RETURN HOME
+// --------------------------------------------------
+// GENERATE DOMINO LAYOUT
+// --------------------------------------------------
 
-function showHome() {
+function generateTiling() {
 
-    if (changing || home.classList.contains("active")) return;
+    const occupied = Array(SIZE * SIZE).fill(false);
+    const pairs = [];
 
-    changing = true;
+    function solve() {
 
-    games.classList.remove("active");
-    home.classList.add("active");
+        let first = occupied.findIndex(value => !value);
 
-    window.scrollTo(0, 0);
+        if (first === -1) {
+            return true;
+        }
 
-    // Keep the background sharp
-    body.classList.add("transitioning");
-    body.classList.remove("leaving");
+        const possible = shuffle(
+            neighbours(first).filter(index => !occupied[index])
+        );
 
-    setTimeout(() => {
-        changing = false;
-    }, 750);
+        for (const next of possible) {
+
+            occupied[first] = true;
+            occupied[next] = true;
+
+            pairs.push([first, next]);
+
+            if (solve()) {
+                return true;
+            }
+
+            pairs.pop();
+
+            occupied[first] = false;
+            occupied[next] = false;
+        }
+
+        return false;
+    }
+
+    if (!solve()) {
+        throw new Error("Could not generate domino layout.");
+    }
+
+    return pairs;
 }
 
 
-// BUTTON EVENTS
+// --------------------------------------------------
+// GENERATE CONNECTED REGIONS
+// --------------------------------------------------
 
-document.getElementById("playButton")
-    .addEventListener("click", showGames);
+function generateRegions(values) {
 
-document.getElementById("backButton")
-    .addEventListener("click", showHome);
+    let unassigned = new Set(
+        Array.from({ length: SIZE * SIZE }, (_, i) => i)
+    );
+
+    let result = [];
+    let regionId = 0;
+
+    const settings = {
+        easy: { min: 4, max: 6 },
+        medium: { min: 3, max: 5 },
+        hard: { min: 2, max: 4 }
+    };
+
+    const config = settings[difficulty];
+
+    while (unassigned.size > 0) {
+
+        const start = shuffle([...unassigned])[0];
+
+        const targetSize =
+            config.min + randomInt(config.max - config.min + 1);
+
+        let cells = [start];
+        unassigned.delete(start);
+
+        while (cells.length < targetSize) {
+
+            let possible = [];
+
+            for (const cell of cells) {
+                for (const next of neighbours(cell)) {
+                    if (unassigned.has(next)) {
+                        possible.push(next);
+                    }
+                }
+            }
+
+            possible = [...new Set(possible)];
+
+            if (possible.length === 0) break;
+
+            const next = possible[randomInt(possible.length)];
+
+            cells.push(next);
+            unassigned.delete(next);
+        }
+
+        const regionValues = cells.map(cell => values[cell]);
+
+        let type = "sum";
+        let target = regionValues.reduce((a, b) => a + b, 0);
+
+        const allSame = regionValues.every(
+            value => value === regionValues[0]
+        );
+
+        const allDifferent =
+            new Set(regionValues).size === regionValues.length;
+
+        if (difficulty !== "easy") {
+
+            const chance = Math.random();
+
+            if (allSame && chance < (difficulty === "hard" ? .55 : .35)) {
+                type = "same";
+                target = regionValues[0];
+            }
+
+            else if (
+                allDifferent &&
+                chance < (difficulty === "hard" ? .8 : .55)
+            ) {
+                type = "different";
+                target = null;
+            }
+        }
+
+        result.push({
+            id: regionId++,
+            cells,
+            type,
+            target
+        });
+    }
+
+    return result;
+}
 
 
-// PIPS PLACEHOLDER
+// --------------------------------------------------
+// GENERATE COMPLETE PUZZLE
+// --------------------------------------------------
 
-document.getElementById("pipsCard")
-    .addEventListener("click", () => {
+function generatePuzzle() {
 
-        toast.classList.add("show");
+    const pairs = generateTiling();
 
-        clearTimeout(window.toastTimer);
+    const values = Array(SIZE * SIZE).fill(0);
 
-        window.toastTimer = setTimeout(() => {
-            toast.classList.remove("show");
-        }, 2600);
+    dominoes = pairs.map((pair, id) => {
 
+        const a = randomInt(7);
+        const b = randomInt(7);
+
+        values[pair[0]] = a;
+        values[pair[1]] = b;
+
+        return {
+            id,
+            a,
+            b,
+            placed: false,
+            cells: null
+        };
     });
+
+    regions = generateRegions(values);
+
+    boardData = Array.from(
+        { length: SIZE * SIZE },
+        (_, index) => ({
+            index,
+            value: null,
+            dominoId: null,
+            regionId: null
+        })
+    );
+
+    regions.forEach(region => {
+        region.cells.forEach(index => {
+            boardData[index].regionId = region.id;
+        });
+    });
+
+    selectedDomino = null;
+    firstCell = null;
+    flipped = false;
+
+    render();
+}
+
+
+// --------------------------------------------------
+// BOARD RENDERING
+// --------------------------------------------------
+
+function renderBoard() {
+
+    const board = document.getElementById("board");
+
+    board.innerHTML = "";
+
+    for (let i = 0; i < SIZE * SIZE; i++) {
+
+        const cell = boardData[i];
+        const row = Math.floor(i / SIZE);
+        const col = i % SIZE;
+
+        const element = document.createElement("div");
+
+        element.className = "cell";
+
+        const region = regions[cell.regionId];
+
+        const top = row === 0 ||
+            boardData[i - SIZE]?.regionId !== cell.regionId;
+
+        const bottom = row === SIZE - 1 ||
+            boardData[i + SIZE]?.regionId !== cell.regionId;
+
+        const left = col === 0 ||
+            boardData[i - 1]?.regionId !== cell.regionId;
+
+        const right = col === SIZE - 1 ||
+            boardData[i + 1]?.regionId !== cell.regionId;
+
+        if (top) element.classList.add("region-top");
+        if (bottom) element.classList.add("region-bottom");
+        if (left) element.classList.add("region-left");
+        if (right) element.classList.add("region-right");
+
+        if (cell.value !== null) {
+            element.classList.add("filled");
+            element.textContent = cell.value;
+        }
+
+        if (firstCell === i) {
+            element.classList.add("selected");
+        }
+
+        const firstRegionCell = region.cells[0];
+
+        if (i === firstRegionCell) {
+
+            const clue = document.createElement("span");
+            clue.className = "clue";
+
+            if (region.type === "sum") {
+                clue.textContent = `Sum: ${region.target}`;
+            }
+
+            else if (region.type === "same") {
+                clue.textContent = "All equal";
+            }
+
+            else {
+                clue.textContent = "All different";
+            }
+
+            element.appendChild(clue);
+        }
+
+        element.addEventListener("click", () => {
+            clickCell(i);
+        });
+
+        board.appendChild(element);
+    }
+}
+
+
+// --------------------------------------------------
+// DOMINO TRAY
+// --------------------------------------------------
+
+function renderTray() {
+
+    const tray = document.getElementById("tray");
+
+    tray.innerHTML = "";
+
+    dominoes.forEach(domino => {
+
+        const element = document.createElement("button");
+
+        element.className = "domino";
+
+        if (domino.placed) {
+            element.classList.add("used");
+        }
+
+        if (selectedDomino === domino.id) {
+            element.classList.add("selected");
+        }
+
+        const a = flipped ? domino.b : domino.a;
+        const b = flipped ? domino.a : domino.b;
+
+        element.innerHTML = `
+            <span>${a}</span>
+            <span>|</span>
+            <span>${b}</span>
+        `;
+
+        element.addEventListener("click", () => {
+
+            if (domino.placed) return;
+
+            selectedDomino = domino.id;
+            firstCell = null;
+            flipped = false;
+
+            render();
+        });
+
+        tray.appendChild(element);
+    });
+}
+
+
+// --------------------------------------------------
+// PLACE AND REMOVE DOMINOES
+// --------------------------------------------------
+
+function clickCell(index) {
+
+    const cell = boardData[index];
+
+    // Remove a placed domino
+
+    if (cell.dominoId !== null) {
+
+        const domino = dominoes.find(
+            d => d.id === cell.dominoId
+        );
+
+        domino.cells.forEach(position => {
+
+            boardData[position].value = null;
+            boardData[position].dominoId = null;
+
+        });
+
+        domino.placed = false;
+        domino.cells = null;
+
+        selectedDomino = null;
+        firstCell = null;
+
+        render();
+        return;
+    }
+
+    if (selectedDomino === null) {
+        document.getElementById("status").textContent =
+            "Select a domino first.";
+        return;
+    }
+
+    if (firstCell === null) {
+
+        firstCell = index;
+
+        render();
+        return;
+    }
+
+    // The two squares must be adjacent
+
+    if (!neighbours(firstCell).includes(index)) {
+
+        firstCell = index;
+        render();
+
+        document.getElementById("status").textContent =
+            "Choose a square next to the selected square.";
+
+        return;
+    }
+
+    const domino = dominoes.find(
+        d => d.id === selectedDomino
+    );
+
+    if (cell.value !== null || boardData[firstCell].value !== null) {
+        return;
+    }
+
+    const a = flipped ? domino.b : domino.a;
+    const b = flipped ? domino.a : domino.b;
+
+    boardData[firstCell].value = a;
+    boardData[index].value = b;
+
+    boardData[firstCell].dominoId = domino.id;
+    boardData[index].dominoId = domino.id;
+
+    domino.placed = true;
+    domino.cells = [firstCell, index];
+
+    selectedDomino = null;
+    firstCell = null;
+    flipped = false;
+
+    render();
+    checkProgress();
+}
+
+
+// --------------------------------------------------
+// CHECK REGION RULES
+// --------------------------------------------------
+
+function checkRegion(region) {
+
+    const values = region.cells.map(
+        index => boardData[index].value
+    );
+
+    if (values.some(value => value === null)) {
+        return null;
+    }
+
+    if (region.type === "sum") {
+
+        const total = values.reduce((a, b) => a + b, 0);
+
+        return total === region.target;
+    }
+
+    if (region.type === "same") {
+
+        return values.every(value => value === values[0]);
+    }
+
+    if (region.type === "different") {
+
+        return new Set(values).size === values.length;
+    }
+
+    return false;
+}
+
+
+// --------------------------------------------------
+// PROGRESS AND WIN CONDITION
+// --------------------------------------------------
+
+function checkProgress() {
+
+    const filled = boardData.filter(
+        cell => cell.value !== null
+    ).length;
+
+    const completed = regions.filter(
+        region => checkRegion(region) === true
+    ).length;
+
+    document.getElementById("progress").textContent =
+        `${filled} / 36 squares filled`;
+
+    if (filled !== 36) {
+        document.getElementById("status").textContent =
+            `${completed} / ${regions.length} regions satisfied`;
+        return;
+    }
+
+    const allCorrect = regions.every(
+        region => checkRegion(region) === true
+    );
+
+    if (allCorrect) {
+
+        document.getElementById("status").textContent =
+            "Puzzle completed! You solved it!";
+
+    } else {
+
+        document.getElementById("status").textContent =
+            "Some regions are incorrect. Try moving your dominoes.";
+    }
+}
+
+
+// --------------------------------------------------
+// MAIN RENDER
+// --------------------------------------------------
+
+function render() {
+
+    renderBoard();
+    renderTray();
+
+    checkProgress();
+}
+
+
+// --------------------------------------------------
+// BUTTONS
+// --------------------------------------------------
+
+document.getElementById("play").addEventListener("click", () => {
+
+    difficulty = document.getElementById("difficulty").value;
+
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("game").style.display = "block";
+
+    document.getElementById("difficultyTitle").textContent =
+        difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+
+    generatePuzzle();
+});
+
+
+document.getElementById("back").addEventListener("click", () => {
+
+    document.getElementById("game").style.display = "none";
+    document.getElementById("menu").style.display = "flex";
+
+});
+
+
+document.getElementById("newPuzzle").addEventListener("click", () => {
+    generatePuzzle();
+});
+
+
+document.getElementById("flip").addEventListener("click", () => {
+
+    if (selectedDomino === null) return;
+
+    flipped = !flipped;
+
+    render();
+});
+
+
+document.getElementById("clearSelection").addEventListener("click", () => {
+
+    selectedDomino = null;
+    firstCell = null;
+    flipped = false;
+
+    render();
+});
 
 </script>
 
