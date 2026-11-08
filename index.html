@@ -66,23 +66,36 @@ button { cursor:pointer; }
 .cell.region-left { border-left:3px solid black; }
 .cell.region-right { border-right:3px solid black; }
 
-/* Draw region edges as inset strokes so adjoining edges meet cleanly. */
-.cell.region-top { box-shadow:inset 0 3px 0 #000; border-top-color:transparent; }
-.cell.region-bottom { box-shadow:inset 0 -3px 0 #000; border-bottom-color:transparent; }
-.cell.region-left { box-shadow:inset 3px 0 0 #000; border-left-color:transparent; }
-.cell.region-right { box-shadow:inset -3px 0 0 #000; border-right-color:transparent; }
-.cell.region-top.region-left { box-shadow:inset 0 3px 0 #000, inset 3px 0 0 #000; }
-.cell.region-top.region-right { box-shadow:inset 0 3px 0 #000, inset -3px 0 0 #000; }
-.cell.region-bottom.region-left { box-shadow:inset 0 -3px 0 #000, inset 3px 0 0 #000; }
-.cell.region-bottom.region-right { box-shadow:inset 0 -3px 0 #000, inset -3px 0 0 #000; }
-.cell.region-top.region-bottom { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000; }
-.cell.region-left.region-right { box-shadow:inset 3px 0 0 #000, inset -3px 0 0 #000; }
-.cell.region-top.region-left.region-right { box-shadow:inset 0 3px 0 #000, inset 3px 0 0 #000, inset -3px 0 0 #000; }
-.cell.region-bottom.region-left.region-right { box-shadow:inset 0 -3px 0 #000, inset 3px 0 0 #000, inset -3px 0 0 #000; }
-.cell.region-top.region-bottom.region-left { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000, inset 3px 0 0 #000; }
-.cell.region-top.region-bottom.region-right { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000, inset -3px 0 0 #000; }
-.cell.region-top.region-bottom.region-left.region-right { box-shadow:inset 0 3px 0 #000, inset 0 -3px 0 #000, inset 3px 0 0 #000, inset -3px 0 0 #000; }
-.cell.drop-target { background:#f0f0f0; }
+/* Seamless region borders */
+.cell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 2;
+    border: 0;
+}
+
+.cell.region-top::before {
+    border-top: 3px solid black;
+}
+
+.cell.region-bottom::before {
+    border-bottom: 3px solid black;
+}
+
+.cell.region-left::before {
+    border-left: 3px solid black;
+}
+
+.cell.region-right::before {
+    border-right: 3px solid black;
+}
+
+.cell.drop-target {
+    background: #f0f0f0;
+}
 
 .region-badge {
     position:absolute; width:27px; height:27px; border:1.5px solid black;
