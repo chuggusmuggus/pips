@@ -58,8 +58,14 @@ button { cursor:pointer; }
     grid-template-rows:repeat(6,64px); width:384px; height:384px;
 }
 .cell {
-    position:relative; border:1px solid #aaa; display:flex; align-items:center;
-    justify-content:center; background:white; overflow:visible;
+    position:relative;
+    border:1px solid #aaa;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:white;
+    overflow:visible;
+    z-index:0;
 }
 .cell.region-top { border-top:3px solid black; }
 .cell.region-bottom { border-bottom:3px solid black; }
@@ -73,7 +79,7 @@ button { cursor:pointer; }
     inset: 0;
     box-sizing: border-box;
     pointer-events: none;
-    z-index: 2;
+    z-index: 4;
     border: 0;
 }
 
