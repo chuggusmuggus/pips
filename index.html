@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,40 +66,15 @@ button { cursor:pointer; }
     justify-content:center; background:white; overflow:visible;
 }
 
-/* Region borders: centred and extended to meet neighbouring lines */
-.region-edge {
+/* Region borders: one board-wide overlay */
+#regionBorders {
     position:absolute;
-    background:black;
+    inset:0;
+    width:100%;
+    height:100%;
     pointer-events:none;
-    z-index:5;
-}
-
-.region-edge.top {
-    height:3px;
-    left:-1px;
-    right:-1px;
-    top:-2.5px;
-}
-
-.region-edge.bottom {
-    height:3px;
-    left:-1px;
-    right:-1px;
-    bottom:-2.5px;
-}
-
-.region-edge.left {
-    width:3px;
-    top:-1px;
-    bottom:-1px;
-    left:-2.5px;
-}
-
-.region-edge.right {
-    width:3px;
-    top:-1px;
-    bottom:-1px;
-    right:-2.5px;
+    z-index:6;
+    overflow:visible;
 }
 
 .cell.drop-target {
@@ -338,7 +314,7 @@ const tutorials = [
     },
     {
         title: "Less than and greater than",
-        text: "A clue such as <8 means the total pips in that region must be less than 8. A clue such as >8 means the total must be greater than 8. The number is a limit, not the required total.",
+        text: "A clue such as <8 means the total pips in that region must be less than 8. A clue such as >8 means the total pips must be greater than 8. The number is a limit, not the required total.",
         symbols: ["<8", ">8"]
     },
     {
@@ -858,31 +834,6 @@ function renderBoard() {
         const sameRegion = index =>
             boardData[index]?.regionId === cell.regionId;
 
-        if (row === 0 || !sameRegion(i - SIZE)) {
-            element.classList.add("region-top");
-        }
-
-        if (row === SIZE - 1) {
-            element.classList.add("region-bottom");
-        }
-
-        if (col === 0 || !sameRegion(i - 1)) {
-            element.classList.add("region-left");
-        }
-
-        if (col === SIZE - 1) {
-            element.classList.add("region-right");
-        }
-
-        // Add individual border elements for precise alignment.
-        ["top", "left", "bottom", "right"].forEach(side => {
-            if (element.classList.contains(`region-${side}`)) {
-                const edge = document.createElement("div");
-                edge.className = `region-edge ${side}`;
-                element.appendChild(edge);
-            }
-        });
-
         if (cell.dominoId !== null) {
             const domino = dominoes.find(d => d.id === cell.dominoId);
             const halfIndex = domino.cells.indexOf(i);
@@ -933,6 +884,60 @@ function renderBoard() {
 
         board.appendChild(element);
     }
+
+    // Draw all region boundaries on one SVG overlay.
+    // This places every line directly on the shared grid boundary.
+    const svgNS = "http://www.w3.org/2000/svg";
+    const overlay = document.createElementNS(svgNS, "svg");
+
+    overlay.setAttribute("id", "regionBorders");
+    overlay.setAttribute("viewBox", "0 0 384 384");
+    overlay.setAttribute("preserveAspectRatio", "none");
+
+    let pathData = "";
+
+    for (let i = 0; i < SIZE * SIZE; i++) {
+        const row = Math.floor(i / SIZE);
+        const col = i % SIZE;
+        const regionId = boardData[i].regionId;
+
+        const x = col * 64;
+        const y = row * 64;
+
+        if (
+            row === 0 ||
+            boardData[i - SIZE].regionId !== regionId
+        ) {
+            pathData += `M ${x} ${y} H ${x + 64} `;
+        }
+
+        if (
+            col === 0 ||
+            boardData[i - 1].regionId !== regionId
+        ) {
+            pathData += `M ${x} ${y} V ${y + 64} `;
+        }
+
+        if (row === SIZE - 1) {
+            pathData += `M ${x} ${y + 64} H ${x + 64} `;
+        }
+
+        if (col === SIZE - 1) {
+            pathData += `M ${x + 64} ${y} V ${y + 64} `;
+        }
+    }
+
+    const borderPath = document.createElementNS(svgNS, "path");
+
+    borderPath.setAttribute("d", pathData);
+    borderPath.setAttribute("fill", "none");
+    borderPath.setAttribute("stroke", "black");
+    borderPath.setAttribute("stroke-width", "3");
+    borderPath.setAttribute("stroke-linecap", "square");
+    borderPath.setAttribute("stroke-linejoin", "miter");
+
+    overlay.appendChild(borderPath);
+    board.appendChild(overlay);
 
     // Put each clue in a circle at the bottom-right edge of its region.
     regions.forEach(region => {
