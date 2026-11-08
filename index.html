@@ -62,27 +62,35 @@ button { cursor:pointer; }
 }
 
 /* Region borders: centred over the grey grid lines */
+/* Region borders */
 .cell::before {
-    content:"";
-    position:absolute;
-    inset:-1px;
-    box-sizing:border-box;
-    pointer-events:none;
-    z-index:4;
-    border:0;
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    border: 0;
+    box-sizing: border-box;
 }
 
 .cell.region-top::before {
-    border-top:3px solid black;
+    border-top: 3px solid black;
+    top: -1.5px;
 }
+
 .cell.region-left::before {
-    border-left:3px solid black;
+    border-left: 3px solid black;
+    left: -1.5px;
 }
+
 .cell.region-bottom::before {
-    border-bottom:3px solid black;
+    border-bottom: 3px solid black;
+    bottom: -1.5px;
 }
+
 .cell.region-right::before {
-    border-right:3px solid black;
+    border-right: 3px solid black;
+    right: -1.5px;
 }
 
 .cell.drop-target {
