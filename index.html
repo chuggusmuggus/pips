@@ -22,6 +22,12 @@ button, select {
     font: inherit;
 }
 
+button {
+    cursor: pointer;
+}
+
+/* HOME MENU */
+
 #menu {
     min-height: 100vh;
     display: flex;
@@ -37,17 +43,18 @@ button, select {
     background: white;
     color: black;
     border: 1px solid black;
-    cursor: pointer;
 }
 
 #menu button {
     min-width: 140px;
 }
 
+/* GAME */
+
 #game {
     display: none;
     padding: 25px;
-    max-width: 900px;
+    max-width: 950px;
     margin: auto;
 }
 
@@ -64,15 +71,33 @@ button, select {
     background: white;
     border: 1px solid black;
     padding: 8px 13px;
-    cursor: pointer;
+}
+
+#progress {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#status {
+    text-align: center;
+    margin: 18px 0;
+    min-height: 24px;
+}
+
+/* BOARD */
+
+#boardWrap {
+    position: relative;
+    width: max-content;
+    margin: 0 auto 25px;
 }
 
 #board {
     display: grid;
     grid-template-columns: repeat(6, 64px);
     grid-template-rows: repeat(6, 64px);
-    width: max-content;
-    margin: 0 auto 25px;
+    width: 384px;
+    height: 384px;
 }
 
 .cell {
@@ -81,9 +106,8 @@ button, select {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 25px;
     cursor: pointer;
-    user-select: none;
+    background: white;
 }
 
 .cell.region-top {
@@ -102,98 +126,288 @@ button, select {
     border-right: 3px solid black;
 }
 
-.cell.selected {
-    background: #e8e8e8;
+.cell.drop-target {
+    background: #f0f0f0;
 }
 
-.cell.filled {
-    background: #f3f3f3;
-}
-
-.cell .clue {
+.region-clue {
     position: absolute;
     top: 2px;
     left: 3px;
-    font-size: 9px;
+    z-index: 2;
+    font-size: 12px;
     font-weight: bold;
-    max-width: 58px;
-    line-height: 1.1;
+    background: white;
+    padding: 1px 3px;
+    pointer-events: none;
+}
+
+/* DOMINO HALVES ON BOARD */
+
+.domino-half {
+    position: absolute;
+    inset: 1px;
+    z-index: 3;
+    background: white;
+    border: 2px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.domino-half.horizontal.first {
+    border-radius: 7px 0 0 7px;
+    border-right-width: 1px;
+}
+
+.domino-half.horizontal.second {
+    border-radius: 0 7px 7px 0;
+    border-left-width: 1px;
+}
+
+.domino-half.vertical.first {
+    border-radius: 7px 7px 0 0;
+    border-bottom-width: 1px;
+}
+
+.domino-half.vertical.second {
+    border-radius: 0 0 7px 7px;
+    border-top-width: 1px;
+}
+
+.domino-half.selected {
+    background: #f0f0f0;
+}
+
+/* PIPS */
+
+.pip-grid {
+    width: 43px;
+    height: 43px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 4px;
+}
+
+.pip {
+    width: 7px;
+    height: 7px;
+    background: black;
+    border-radius: 50%;
+    align-self: center;
+    justify-self: center;
+}
+
+/* DOMINO TRAY */
+
+#trayTitle {
+    text-align: center;
+    margin: 15px 0 10px;
 }
 
 #tray {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    max-width: 700px;
+    gap: 10px;
+    max-width: 750px;
     margin: auto;
 }
 
-.domino {
+.tray-domino {
     display: flex;
-    border: 1px solid black;
-    background: white;
-    cursor: pointer;
-    min-width: 76px;
-    height: 42px;
     align-items: center;
-    justify-content: center;
-    font-size: 20px;
+    background: white;
+    padding: 0;
+    border: none;
+    cursor: grab;
 }
 
-.domino span {
-    padding: 0 9px;
+.tray-domino:active {
+    cursor: grabbing;
 }
 
-.domino.selected {
-    background: #e5e5e5;
+.tray-domino.selected {
     outline: 2px solid black;
+    outline-offset: 3px;
 }
 
-.domino.used {
-    display: none;
-}
-
-#controls {
+.tray-half {
+    width: 39px;
+    height: 39px;
+    border: 2px solid black;
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
+    align-items: center;
+    background: white;
 }
 
-#status {
-    text-align: center;
-    margin: 15px 0;
-    min-height: 24px;
+.tray-half:first-child {
+    border-radius: 6px 0 0 6px;
+    border-right-width: 1px;
 }
 
-#progress {
-    text-align: center;
-    margin-bottom: 15px;
+.tray-half:last-child {
+    border-radius: 0 6px 6px 0;
+    border-left-width: 1px;
 }
 
-#instructions {
-    text-align: center;
-    margin: 10px;
-    font-size: 14px;
+.tray-half .pip-grid {
+    width: 34px;
+    height: 34px;
+    padding: 3px;
 }
 
-@media (max-width: 600px) {
+.tray-half .pip {
+    width: 6px;
+    height: 6px;
+}
+
+/* PLACEMENT CONTROLS */
+
+#dominoTools {
+    position: absolute;
+    z-index: 10;
+    display: none;
+    gap: 5px;
+}
+
+#dominoTools.show {
+    display: flex;
+}
+
+.tool-button {
+    width: 29px;
+    height: 29px;
+    border: 1px solid black;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    padding: 0;
+}
+
+.tool-button:hover {
+    background: #eee;
+}
+
+/* TUTORIAL */
+
+#tutorialOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.25);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+}
+
+#tutorialOverlay.show {
+    display: flex;
+}
+
+#tutorialBox {
+    width: min(440px, calc(100% - 30px));
+    min-height: 300px;
+    background: white;
+    border: 1px solid black;
+    padding: 25px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+#tutorialClose {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: white;
+    font-size: 22px;
+}
+
+#tutorialContent {
+    flex: 1;
+    padding: 15px 5px;
+}
+
+#tutorialContent h2 {
+    margin-top: 15px;
+}
+
+#tutorialContent p {
+    line-height: 1.6;
+}
+
+#tutorialNavigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+#tutorialNavigation button {
+    background: white;
+    border: 1px solid black;
+    padding: 7px 12px;
+}
+
+#tutorialDots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.tutorial-dot {
+    width: 9px;
+    height: 9px;
+    border: 1px solid black;
+    border-radius: 50%;
+    padding: 0;
+    background: white;
+}
+
+.tutorial-dot.active {
+    background: black;
+}
+
+@media (max-width: 500px) {
     #game {
         padding: 10px;
     }
 
     #board {
-        grid-template-columns: repeat(6, min(14vw, 64px));
-        grid-template-rows: repeat(6, min(14vw, 64px));
+        grid-template-columns: repeat(6, min(15vw, 64px));
+        grid-template-rows: repeat(6, min(15vw, 64px));
+        width: auto;
+        height: auto;
     }
 
     .cell {
-        font-size: 20px;
+        aspect-ratio: 1;
     }
 
-    .cell .clue {
-        font-size: 7px;
+    .region-clue {
+        font-size: 9px;
+    }
+
+    .pip-grid {
+        width: 90%;
+        height: 90%;
+    }
+
+    .pip {
+        width: 5px;
+        height: 5px;
+    }
+
+    #gameTop {
+        flex-wrap: wrap;
     }
 }
 </style>
@@ -201,10 +415,9 @@ button, select {
 
 <body>
 
-<!-- HOME MENU -->
+<!-- HOME -->
 
 <div id="menu">
-
     <select id="difficulty">
         <option value="easy">Easy</option>
         <option value="medium" selected>Medium</option>
@@ -212,7 +425,6 @@ button, select {
     </select>
 
     <button id="play">Play</button>
-
 </div>
 
 
@@ -223,26 +435,53 @@ button, select {
     <div id="gameTop">
         <button id="back">Back</button>
         <strong id="difficultyTitle">Medium</strong>
+        <button id="tutorialButton">Tutorial</button>
         <button id="newPuzzle">New puzzle</button>
     </div>
 
     <div id="progress"></div>
 
-    <div id="board"></div>
+    <div id="boardWrap">
 
-    <div id="instructions">
-        Select a domino, then click two adjacent empty squares to place it.
-        Select a placed domino to remove it.
+        <div id="board"></div>
+
+        <div id="dominoTools">
+            <button class="tool-button" id="rotateButton" title="Rotate clockwise">↻</button>
+            <button class="tool-button" id="confirmButton" title="Confirm placement">✓</button>
+        </div>
+
     </div>
 
-    <div id="controls">
-        <button id="flip">Flip domino</button>
-        <button id="clearSelection">Deselect</button>
-    </div>
+    <div id="trayTitle">Dominoes</div>
 
     <div id="tray"></div>
 
     <div id="status"></div>
+
+</div>
+
+
+<!-- TUTORIAL -->
+
+<div id="tutorialOverlay">
+
+    <div id="tutorialBox">
+
+        <button id="tutorialClose">×</button>
+
+        <div id="tutorialContent"></div>
+
+        <div id="tutorialNavigation">
+
+            <button id="tutorialPrev">←</button>
+
+            <div id="tutorialDots"></div>
+
+            <button id="tutorialNext">→</button>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -256,15 +495,39 @@ button, select {
 const SIZE = 6;
 
 let difficulty = "medium";
-let puzzle = null;
-
 let selectedDomino = null;
-let firstCell = null;
-let flipped = false;
-
-let boardData = [];
-let dominoes = [];
+let draggedDomino = null;
 let regions = [];
+let dominoes = [];
+let boardData = [];
+let tutorialPage = 0;
+
+const tutorials = [
+    {
+        title: "How to play",
+        text: "Your goal is to fill the entire board using every domino. Each domino has two numbers, shown as dots called pips. Drag a domino from the tray onto two adjacent squares."
+    },
+    {
+        title: "Sum clues",
+        text: "A number in the corner of a region means that all the pips inside that region must add up to that number. For example, 5 means the total must equal 5."
+    },
+    {
+        title: "Equal and not equal",
+        text: "The = symbol means every square in that region must contain the same number of pips. The ≠ symbol means every square must contain a different number of pips."
+    },
+    {
+        title: "Less than and greater than",
+        text: "A clue such as <5 means the total number of pips in that region must be less than 5. A clue such as >5 means the total must be greater than 5."
+    },
+    {
+        title: "Rotating dominoes",
+        text: "After placing a domino, click either half to select it. Use the small circular arrow to rotate it clockwise. Press the tick to confirm. Click the selected domino again to deselect it."
+    },
+    {
+        title: "Moving dominoes",
+        text: "You can drag dominoes from the tray onto the board. To remove a placed domino and return it to the tray, double-click either half of it."
+    }
+];
 
 
 // --------------------------------------------------
@@ -276,7 +539,14 @@ function randomInt(max) {
 }
 
 function shuffle(array) {
-    return [...array].sort(() => Math.random() - 0.5);
+    const result = [...array];
+
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = randomInt(i + 1);
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+
+    return result;
 }
 
 function neighbours(index) {
@@ -295,6 +565,40 @@ function neighbours(index) {
 
 
 // --------------------------------------------------
+// PIP DISPLAY
+// --------------------------------------------------
+
+const pipPatterns = {
+    0: [],
+    1: [4],
+    2: [0, 8],
+    3: [0, 4, 8],
+    4: [0, 2, 6, 8],
+    5: [0, 2, 4, 6, 8],
+    6: [0, 2, 3, 5, 6, 8]
+};
+
+function createPips(value) {
+
+    const grid = document.createElement("div");
+    grid.className = "pip-grid";
+
+    for (let i = 0; i < 9; i++) {
+
+        const position = document.createElement("div");
+
+        if (pipPatterns[value].includes(i)) {
+            position.className = "pip";
+        }
+
+        grid.appendChild(position);
+    }
+
+    return grid;
+}
+
+
+// --------------------------------------------------
 // GENERATE DOMINO LAYOUT
 // --------------------------------------------------
 
@@ -305,11 +609,9 @@ function generateTiling() {
 
     function solve() {
 
-        let first = occupied.findIndex(value => !value);
+        const first = occupied.findIndex(value => !value);
 
-        if (first === -1) {
-            return true;
-        }
+        if (first === -1) return true;
 
         const possible = shuffle(
             neighbours(first).filter(index => !occupied[index])
@@ -322,9 +624,7 @@ function generateTiling() {
 
             pairs.push([first, next]);
 
-            if (solve()) {
-                return true;
-            }
+            if (solve()) return true;
 
             pairs.pop();
 
@@ -353,7 +653,7 @@ function generateRegions(values) {
         Array.from({ length: SIZE * SIZE }, (_, i) => i)
     );
 
-    let result = [];
+    const result = [];
     let regionId = 0;
 
     const settings = {
@@ -371,7 +671,7 @@ function generateRegions(values) {
         const targetSize =
             config.min + randomInt(config.max - config.min + 1);
 
-        let cells = [start];
+        const cells = [start];
         unassigned.delete(start);
 
         while (cells.length < targetSize) {
@@ -397,9 +697,7 @@ function generateRegions(values) {
         }
 
         const regionValues = cells.map(cell => values[cell]);
-
-        let type = "sum";
-        let target = regionValues.reduce((a, b) => a + b, 0);
+        const total = regionValues.reduce((a, b) => a + b, 0);
 
         const allSame = regionValues.every(
             value => value === regionValues[0]
@@ -408,28 +706,62 @@ function generateRegions(values) {
         const allDifferent =
             new Set(regionValues).size === regionValues.length;
 
-        if (difficulty !== "easy") {
+        let options = [
+            { type: "sum", weight: difficulty === "easy" ? 75 : difficulty === "medium" ? 40 : 20 }
+        ];
 
-            const chance = Math.random();
+        if (allSame) {
+            options.push({ type: "same", weight: 15 });
+        }
 
-            if (allSame && chance < (difficulty === "hard" ? .55 : .35)) {
-                type = "same";
-                target = regionValues[0];
+        if (allDifferent) {
+            options.push({ type: "different", weight: 15 });
+        }
+
+        options.push({
+            type: "less",
+            weight: difficulty === "easy" ? 5 : difficulty === "medium" ? 15 : 25
+        });
+
+        if (total > 0) {
+            options.push({
+                type: "greater",
+                weight: difficulty === "easy" ? 0 : difficulty === "medium" ? 15 : 25
+            });
+        }
+
+        options = options.filter(option => option.weight > 0);
+
+        const totalWeight = options.reduce(
+            (sum, option) => sum + option.weight, 0
+        );
+
+        let roll = Math.random() * totalWeight;
+        let chosen = options[0].type;
+
+        for (const option of options) {
+            roll -= option.weight;
+
+            if (roll <= 0) {
+                chosen = option.type;
+                break;
             }
+        }
 
-            else if (
-                allDifferent &&
-                chance < (difficulty === "hard" ? .8 : .55)
-            ) {
-                type = "different";
-                target = null;
-            }
+        let target = total;
+
+        if (chosen === "less") {
+            target = total + 1 + randomInt(3);
+        }
+
+        if (chosen === "greater") {
+            target = Math.max(0, total - 1 - randomInt(3));
         }
 
         result.push({
             id: regionId++,
             cells,
-            type,
+            type: chosen,
             target
         });
     }
@@ -439,7 +771,7 @@ function generateRegions(values) {
 
 
 // --------------------------------------------------
-// GENERATE COMPLETE PUZZLE
+// GENERATE PUZZLE
 // --------------------------------------------------
 
 function generatePuzzle() {
@@ -461,7 +793,10 @@ function generatePuzzle() {
             a,
             b,
             placed: false,
-            cells: null
+            cells: null,
+            orientation: "horizontal",
+            swapped: false,
+            confirmed: false
         };
     });
 
@@ -484,15 +819,260 @@ function generatePuzzle() {
     });
 
     selectedDomino = null;
-    firstCell = null;
-    flipped = false;
+    draggedDomino = null;
 
     render();
 }
 
 
 // --------------------------------------------------
-// BOARD RENDERING
+// REGION CLUES
+// --------------------------------------------------
+
+function getClue(region) {
+
+    if (region.type === "sum") return String(region.target);
+    if (region.type === "same") return "=";
+    if (region.type === "different") return "≠";
+    if (region.type === "less") return `<${region.target}`;
+    if (region.type === "greater") return `>${region.target}`;
+
+    return "";
+}
+
+function getRegionCorner(region) {
+
+    return Math.min(...region.cells.map(index => {
+        const row = Math.floor(index / SIZE);
+        const col = index % SIZE;
+        return row * 100 + col;
+    }));
+}
+
+
+// --------------------------------------------------
+// GET DOMINO CELLS
+// --------------------------------------------------
+
+function getDominoCells(anchor, orientation) {
+
+    const row = Math.floor(anchor / SIZE);
+    const col = anchor % SIZE;
+
+    if (orientation === "horizontal") {
+
+        if (col >= SIZE - 1) return null;
+
+        return [anchor, anchor + 1];
+    }
+
+    if (row >= SIZE - 1) return null;
+
+    return [anchor, anchor + SIZE];
+}
+
+
+// --------------------------------------------------
+// PLACE DOMINO
+// --------------------------------------------------
+
+function placeDomino(id, anchor) {
+
+    const domino = dominoes.find(d => d.id === id);
+
+    if (!domino || domino.placed) return false;
+
+    let orientation = "horizontal";
+    let cells = getDominoCells(anchor, orientation);
+
+    if (
+        !cells ||
+        cells.some(index => boardData[index].value !== null)
+    ) {
+        orientation = "vertical";
+        cells = getDominoCells(anchor, orientation);
+    }
+
+    if (
+        !cells ||
+        cells.some(index => boardData[index].value !== null)
+    ) {
+        document.getElementById("status").textContent =
+            "There isn't enough room for that domino there.";
+        return false;
+    }
+
+    domino.placed = true;
+    domino.cells = cells;
+    domino.orientation = orientation;
+    domino.swapped = false;
+    domino.confirmed = false;
+
+    const firstValue = domino.a;
+    const secondValue = domino.b;
+
+    boardData[cells[0]].value = firstValue;
+    boardData[cells[1]].value = secondValue;
+
+    boardData[cells[0]].dominoId = id;
+    boardData[cells[1]].dominoId = id;
+
+    selectedDomino = id;
+
+    return true;
+}
+
+
+// --------------------------------------------------
+// REMOVE DOMINO
+// --------------------------------------------------
+
+function removeDomino(id) {
+
+    const domino = dominoes.find(d => d.id === id);
+
+    if (!domino || !domino.placed) return;
+
+    domino.cells.forEach(index => {
+        boardData[index].value = null;
+        boardData[index].dominoId = null;
+    });
+
+    domino.placed = false;
+    domino.cells = null;
+    domino.confirmed = false;
+
+    selectedDomino = null;
+
+    render();
+}
+
+
+// --------------------------------------------------
+// ROTATE SELECTED DOMINO
+// --------------------------------------------------
+
+function rotateSelected() {
+
+    const domino = dominoes.find(d => d.id === selectedDomino);
+
+    if (!domino || !domino.placed) return;
+
+    const oldOrientation = domino.orientation;
+    const oldSwapped = domino.swapped;
+
+    const oldCells = [...domino.cells];
+
+    oldCells.forEach(index => {
+        boardData[index].value = null;
+        boardData[index].dominoId = null;
+    });
+
+    const newOrientation =
+        oldOrientation === "horizontal" ? "vertical" : "horizontal";
+
+    const newCells = getDominoCells(oldCells[0], newOrientation);
+
+    if (
+        !newCells ||
+        newCells.some(index =>
+            boardData[index].value !== null
+        )
+    ) {
+
+        oldCells.forEach((index, i) => {
+            boardData[index].value = i === 0
+                ? (oldSwapped ? domino.b : domino.a)
+                : (oldSwapped ? domino.a : domino.b);
+
+            boardData[index].dominoId = domino.id;
+        });
+
+        document.getElementById("status").textContent =
+            "There isn't enough room to rotate that domino.";
+
+        return;
+    }
+
+    domino.orientation = newOrientation;
+
+    if (oldOrientation === "vertical") {
+        domino.swapped = !domino.swapped;
+    }
+
+    domino.cells = newCells;
+
+    const values = domino.swapped
+        ? [domino.b, domino.a]
+        : [domino.a, domino.b];
+
+    newCells.forEach((index, i) => {
+        boardData[index].value = values[i];
+        boardData[index].dominoId = domino.id;
+    });
+
+    domino.confirmed = false;
+
+    render();
+}
+
+
+// --------------------------------------------------
+// SELECT / DESELECT DOMINO
+// --------------------------------------------------
+
+function selectDomino(id) {
+
+    if (selectedDomino === id) {
+        selectedDomino = null;
+    } else {
+        selectedDomino = id;
+    }
+
+    render();
+}
+
+
+// --------------------------------------------------
+// PIP HALF RENDERING
+// --------------------------------------------------
+
+function renderDominoHalf(cell, domino, index) {
+
+    const half = document.createElement("div");
+
+    half.className = "domino-half";
+
+    half.classList.add(domino.orientation);
+
+    half.classList.add(index === 0 ? "first" : "second");
+
+    if (selectedDomino === domino.id) {
+        half.classList.add("selected");
+    }
+
+    const values = domino.swapped
+        ? [domino.b, domino.a]
+        : [domino.a, domino.b];
+
+    half.appendChild(createPips(values[index]));
+
+    half.addEventListener("click", event => {
+        event.stopPropagation();
+        selectDomino(domino.id);
+    });
+
+    half.addEventListener("dblclick", event => {
+        event.stopPropagation();
+        removeDomino(domino.id);
+    });
+
+    return half;
+}
+
+
+// --------------------------------------------------
+// BOARD RENDER
 // --------------------------------------------------
 
 function renderBoard() {
@@ -508,70 +1088,102 @@ function renderBoard() {
         const col = i % SIZE;
 
         const element = document.createElement("div");
-
         element.className = "cell";
+
+        const sameRegion = index =>
+            boardData[index]?.regionId === cell.regionId;
+
+        if (row === 0 || !sameRegion(i - SIZE)) {
+            element.classList.add("region-top");
+        }
+
+        if (row === SIZE - 1 || !sameRegion(i + SIZE)) {
+            element.classList.add("region-bottom");
+        }
+
+        if (col === 0 || !sameRegion(i - 1)) {
+            element.classList.add("region-left");
+        }
+
+        if (col === SIZE - 1 || !sameRegion(i + 1)) {
+            element.classList.add("region-right");
+        }
 
         const region = regions[cell.regionId];
 
-        const top = row === 0 ||
-            boardData[i - SIZE]?.regionId !== cell.regionId;
-
-        const bottom = row === SIZE - 1 ||
-            boardData[i + SIZE]?.regionId !== cell.regionId;
-
-        const left = col === 0 ||
-            boardData[i - 1]?.regionId !== cell.regionId;
-
-        const right = col === SIZE - 1 ||
-            boardData[i + 1]?.regionId !== cell.regionId;
-
-        if (top) element.classList.add("region-top");
-        if (bottom) element.classList.add("region-bottom");
-        if (left) element.classList.add("region-left");
-        if (right) element.classList.add("region-right");
-
-        if (cell.value !== null) {
-            element.classList.add("filled");
-            element.textContent = cell.value;
-        }
-
-        if (firstCell === i) {
-            element.classList.add("selected");
-        }
-
-        const firstRegionCell = region.cells[0];
-
-        if (i === firstRegionCell) {
+        if (i === getRegionCorner(region)) {
 
             const clue = document.createElement("span");
-            clue.className = "clue";
-
-            if (region.type === "sum") {
-                clue.textContent = `Sum: ${region.target}`;
-            }
-
-            else if (region.type === "same") {
-                clue.textContent = "All equal";
-            }
-
-            else {
-                clue.textContent = "All different";
-            }
+            clue.className = "region-clue";
+            clue.textContent = getClue(region);
 
             element.appendChild(clue);
         }
 
+        if (cell.dominoId !== null) {
+
+            const domino = dominoes.find(
+                d => d.id === cell.dominoId
+            );
+
+            const halfIndex = domino.cells.indexOf(i);
+
+            element.appendChild(
+                renderDominoHalf(cell, domino, halfIndex)
+            );
+        }
+
         element.addEventListener("click", () => {
-            clickCell(i);
+
+            if (cell.dominoId !== null) {
+                selectDomino(cell.dominoId);
+                return;
+            }
+
+            if (
+                selectedDomino !== null &&
+                !dominoes.find(d => d.id === selectedDomino).placed
+            ) {
+                placeDomino(selectedDomino, i);
+                render();
+            }
+        });
+
+        element.addEventListener("dragover", event => {
+            event.preventDefault();
+            element.classList.add("drop-target");
+        });
+
+        element.addEventListener("dragleave", () => {
+            element.classList.remove("drop-target");
+        });
+
+        element.addEventListener("drop", event => {
+
+            event.preventDefault();
+
+            element.classList.remove("drop-target");
+
+            const id = draggedDomino;
+
+            if (id !== null) {
+                if (placeDomino(id, i)) {
+                    render();
+                }
+            }
+
+            draggedDomino = null;
         });
 
         board.appendChild(element);
     }
+
+    updateDominoTools();
 }
 
 
 // --------------------------------------------------
-// DOMINO TRAY
+// TRAY RENDER
 // --------------------------------------------------
 
 function renderTray() {
@@ -582,36 +1194,47 @@ function renderTray() {
 
     dominoes.forEach(domino => {
 
-        const element = document.createElement("button");
+        if (domino.placed) return;
 
-        element.className = "domino";
+        const element = document.createElement("div");
 
-        if (domino.placed) {
-            element.classList.add("used");
-        }
+        element.className = "tray-domino";
+        element.draggable = true;
 
         if (selectedDomino === domino.id) {
             element.classList.add("selected");
         }
 
-        const a = flipped ? domino.b : domino.a;
-        const b = flipped ? domino.a : domino.b;
+        const first = document.createElement("div");
+        first.className = "tray-half";
+        first.appendChild(createPips(domino.a));
 
-        element.innerHTML = `
-            <span>${a}</span>
-            <span>|</span>
-            <span>${b}</span>
-        `;
+        const second = document.createElement("div");
+        second.className = "tray-half";
+        second.appendChild(createPips(domino.b));
+
+        element.appendChild(first);
+        element.appendChild(second);
 
         element.addEventListener("click", () => {
+            selectDomino(domino.id);
+        });
 
-            if (domino.placed) return;
+        element.addEventListener("dragstart", event => {
 
+            draggedDomino = domino.id;
             selectedDomino = domino.id;
-            firstCell = null;
-            flipped = false;
 
-            render();
+            event.dataTransfer.setData(
+                "text/plain",
+                String(domino.id)
+            );
+
+            event.dataTransfer.effectAllowed = "move";
+        });
+
+        element.addEventListener("dragend", () => {
+            draggedDomino = null;
         });
 
         tray.appendChild(element);
@@ -620,96 +1243,46 @@ function renderTray() {
 
 
 // --------------------------------------------------
-// PLACE AND REMOVE DOMINOES
+// FLOATING ROTATE / CONFIRM CONTROLS
 // --------------------------------------------------
 
-function clickCell(index) {
+function updateDominoTools() {
 
-    const cell = boardData[index];
+    const tools = document.getElementById("dominoTools");
 
-    // Remove a placed domino
+    const domino = dominoes.find(d => d.id === selectedDomino);
 
-    if (cell.dominoId !== null) {
-
-        const domino = dominoes.find(
-            d => d.id === cell.dominoId
-        );
-
-        domino.cells.forEach(position => {
-
-            boardData[position].value = null;
-            boardData[position].dominoId = null;
-
-        });
-
-        domino.placed = false;
-        domino.cells = null;
-
-        selectedDomino = null;
-        firstCell = null;
-
-        render();
+    if (!domino || !domino.placed) {
+        tools.classList.remove("show");
         return;
     }
 
-    if (selectedDomino === null) {
-        document.getElementById("status").textContent =
-            "Select a domino first.";
-        return;
-    }
+    const anchor = domino.cells[0];
 
-    if (firstCell === null) {
+    const row = Math.floor(anchor / SIZE);
+    const col = anchor % SIZE;
 
-        firstCell = index;
+    const cellSize = document.querySelector(".cell")?.getBoundingClientRect().width || 64;
 
-        render();
-        return;
-    }
-
-    // The two squares must be adjacent
-
-    if (!neighbours(firstCell).includes(index)) {
-
-        firstCell = index;
-        render();
-
-        document.getElementById("status").textContent =
-            "Choose a square next to the selected square.";
-
-        return;
-    }
-
-    const domino = dominoes.find(
-        d => d.id === selectedDomino
+    const left = Math.min(
+        col * cellSize,
+        SIZE * cellSize - 65
     );
 
-    if (cell.value !== null || boardData[firstCell].value !== null) {
-        return;
-    }
+    const top = Math.max(
+        row * cellSize - 34,
+        -30
+    );
 
-    const a = flipped ? domino.b : domino.a;
-    const b = flipped ? domino.a : domino.b;
+    tools.style.left = `${left}px`;
+    tools.style.top = `${top}px`;
 
-    boardData[firstCell].value = a;
-    boardData[index].value = b;
-
-    boardData[firstCell].dominoId = domino.id;
-    boardData[index].dominoId = domino.id;
-
-    domino.placed = true;
-    domino.cells = [firstCell, index];
-
-    selectedDomino = null;
-    firstCell = null;
-    flipped = false;
-
-    render();
-    checkProgress();
+    tools.classList.add("show");
 }
 
 
 // --------------------------------------------------
-// CHECK REGION RULES
+// REGION RULE CHECKING
 // --------------------------------------------------
 
 function checkRegion(region) {
@@ -722,21 +1295,26 @@ function checkRegion(region) {
         return null;
     }
 
+    const total = values.reduce((a, b) => a + b, 0);
+
     if (region.type === "sum") {
-
-        const total = values.reduce((a, b) => a + b, 0);
-
         return total === region.target;
     }
 
     if (region.type === "same") {
-
         return values.every(value => value === values[0]);
     }
 
     if (region.type === "different") {
-
         return new Set(values).size === values.length;
+    }
+
+    if (region.type === "less") {
+        return total < region.target;
+    }
+
+    if (region.type === "greater") {
+        return total > region.target;
     }
 
     return false;
@@ -744,7 +1322,7 @@ function checkRegion(region) {
 
 
 // --------------------------------------------------
-// PROGRESS AND WIN CONDITION
+// PROGRESS / WIN CHECK
 // --------------------------------------------------
 
 function checkProgress() {
@@ -761,8 +1339,10 @@ function checkProgress() {
         `${filled} / 36 squares filled`;
 
     if (filled !== 36) {
+
         document.getElementById("status").textContent =
             `${completed} / ${regions.length} regions satisfied`;
+
         return;
     }
 
@@ -770,16 +1350,10 @@ function checkProgress() {
         region => checkRegion(region) === true
     );
 
-    if (allCorrect) {
-
-        document.getElementById("status").textContent =
-            "Puzzle completed! You solved it!";
-
-    } else {
-
-        document.getElementById("status").textContent =
-            "Some regions are incorrect. Try moving your dominoes.";
-    }
+    document.getElementById("status").textContent =
+        allCorrect
+            ? "Puzzle completed! You solved it!"
+            : "Some regions are incorrect. Try moving your dominoes.";
 }
 
 
@@ -788,16 +1362,74 @@ function checkProgress() {
 // --------------------------------------------------
 
 function render() {
-
     renderBoard();
     renderTray();
-
     checkProgress();
 }
 
 
 // --------------------------------------------------
-// BUTTONS
+// TUTORIAL
+// --------------------------------------------------
+
+function renderTutorial() {
+
+    const content = document.getElementById("tutorialContent");
+    const dots = document.getElementById("tutorialDots");
+
+    const page = tutorials[tutorialPage];
+
+    content.innerHTML = `
+        <h2>${page.title}</h2>
+        <p>${page.text}</p>
+    `;
+
+    dots.innerHTML = "";
+
+    tutorials.forEach((item, index) => {
+
+        const dot = document.createElement("button");
+
+        dot.className = "tutorial-dot";
+
+        if (index === tutorialPage) {
+            dot.classList.add("active");
+        }
+
+        dot.addEventListener("click", () => {
+            tutorialPage = index;
+            renderTutorial();
+        });
+
+        dots.appendChild(dot);
+    });
+
+    document.getElementById("tutorialPrev").disabled =
+        tutorialPage === 0;
+
+    document.getElementById("tutorialNext").disabled =
+        tutorialPage === tutorials.length - 1;
+}
+
+function openTutorial() {
+
+    tutorialPage = 0;
+
+    renderTutorial();
+
+    document.getElementById("tutorialOverlay")
+        .classList.add("show");
+}
+
+function closeTutorial() {
+
+    document.getElementById("tutorialOverlay")
+        .classList.remove("show");
+}
+
+
+// --------------------------------------------------
+// BUTTON EVENTS
 // --------------------------------------------------
 
 document.getElementById("play").addEventListener("click", () => {
@@ -813,38 +1445,64 @@ document.getElementById("play").addEventListener("click", () => {
     generatePuzzle();
 });
 
-
 document.getElementById("back").addEventListener("click", () => {
 
     document.getElementById("game").style.display = "none";
     document.getElementById("menu").style.display = "flex";
 
+    selectedDomino = null;
 });
-
 
 document.getElementById("newPuzzle").addEventListener("click", () => {
     generatePuzzle();
 });
 
+document.getElementById("rotateButton").addEventListener("click", rotateSelected);
 
-document.getElementById("flip").addEventListener("click", () => {
+document.getElementById("confirmButton").addEventListener("click", () => {
 
-    if (selectedDomino === null) return;
+    const domino = dominoes.find(d => d.id === selectedDomino);
 
-    flipped = !flipped;
-
-    render();
-});
-
-
-document.getElementById("clearSelection").addEventListener("click", () => {
+    if (domino) {
+        domino.confirmed = true;
+    }
 
     selectedDomino = null;
-    firstCell = null;
-    flipped = false;
 
     render();
 });
+
+document.getElementById("tutorialButton")
+    .addEventListener("click", openTutorial);
+
+document.getElementById("tutorialClose")
+    .addEventListener("click", closeTutorial);
+
+document.getElementById("tutorialPrev")
+    .addEventListener("click", () => {
+
+        if (tutorialPage > 0) {
+            tutorialPage--;
+            renderTutorial();
+        }
+    });
+
+document.getElementById("tutorialNext")
+    .addEventListener("click", () => {
+
+        if (tutorialPage < tutorials.length - 1) {
+            tutorialPage++;
+            renderTutorial();
+        }
+    });
+
+document.getElementById("tutorialOverlay")
+    .addEventListener("click", event => {
+
+        if (event.target.id === "tutorialOverlay") {
+            closeTutorial();
+        }
+    });
 
 </script>
 
